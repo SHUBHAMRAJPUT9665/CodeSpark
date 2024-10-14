@@ -18,7 +18,14 @@ const signup = async (req,res) =>{
           success: true,
           message: "user created",
         });
-      } catch (error) {}
+      } 
+      catch (error) {
+        res.status(200).json({
+            success: false,
+            message: error.message,
+            data:{}
+          });
+      }
 }
 
 
@@ -70,9 +77,7 @@ const updateUser = async (req,res) =>{
 
 
 const userProfile = async (req , res) =>{
-
-
-    console.log("user profile controller")
+    console.log("user profile controller");
 
     res.status(200).json({
         success:true,
