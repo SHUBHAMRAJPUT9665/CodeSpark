@@ -1,100 +1,176 @@
 import User from "../models/user.model.js";
 
-
 // signup user
-const signup = async (req,res) =>{
-    try {
-        const { emailId, firstName, password } = req.body;
-
-        const alredyUser = await User.find({emailId})
-      
-        const userData = new User({
-          emailId,
-          password,
-          firstName,
-        });
-
-        if(!userData) return  res.status(400).json({
-          success:false,
-          message: "error while user created",
-        });
-        userData.save();
-
-
-        const newUser = await User.find({emailId}).select('-password')
-    
-        res.status(200).json({
-          success: true,
-          message: "user created",
-          data:newUser
-        });
-      } 
-      catch (error) {
-        res.status(400).json({
-            success: false,
-            message: error.message,
-            data:{}
-          });
-      }
-}
-
-
-// update user route
-const updateUser = async (req,res) =>{
-    const userId = req.params?.userId; // Correctly access the userId
-    const data = req.body;
-    try {
-      const ALLOWED_UPDATE = ["skills", "photoUrl", "about", "gender", "age"];
-      const isUpdateAllowed = Object.keys(data).every((k) =>
-        ALLOWED_UPDATE.includes(k)
-      );
-  
-      if (!isUpdateAllowed) {
-        throw new Error("update not allowed");
-      }
-  
-      if(data?.skills?.length > 10){
-        throw new Error("skills must be less then 10")
-      }
-      const user = await User.findByIdAndUpdate(userId, data, {
-        // Pass userId directly
-        new: true, // Use 'new' to return the updated document
-        runValidators: true,
-      });
-  
-      if (!user) {
-        return res.status(404).json({
+const signup = async (req, res) => {
+  try {
+    const { emailId, firstName, password,skills,age,gender,about } = req.body;
+    if (!emailId || !firstName || !password) {
+      return (
+        res.status(400),
+        json({
           success: false,
-          message: "User not found",
+          message: "All field are required",
           data: {},
-        });
-      }
-  
-      res.status(200).json({
-        success: true,
-        message: "User updated successfully",
-        data: user,
-      });
-    } catch (error) {
-      res.status(400).json({
+        })
+      );
+    }
+    const userExists = await User.findOne({ emailId });
+
+    if (userExists) {
+      return (
+        res.status(409).
+        json({
+          success: false,
+          message: "user with this email already exits",
+          data: {},
+        })
+      );
+    }
+
+    const user = await User.create({
+      firstName,
+      emailId,
+      password,
+      age,
+      about,
+      gender,
+      skills
+    });
+
+    if (!user)
+      return res.status(500).json({
         success: false,
-        message: error.message,
+        message: "error while user created",
+      });
+      user.save();
+
+    const createdUser = await User.findById( user._id).select("-password");
+
+    if (!createdUser) {
+      return (
+        res.status(500).
+        json({
+          success: false,
+          message: "Error retrieving created user !!!",
+          data: {},
+        })
+      );
+    }
+
+    res.status(201).json({
+      success: true,
+      message: "user created successfully",
+      data: createdUser,
+    });
+  } catch (error) {
+    console.log(error)
+    res.status(400).json({
+      success: false,
+      message: error.message,
+      data: {},
+    });
+  }
+};
+
+// user login controller
+const login = async (req, res, next) => {
+  const { emailId, password } = req.body;
+
+  if (!emailId || !password) {
+    return res.status(400).json({
+      success: false,
+      message: "All fields are required",
+      data: {},
+    });
+  }
+try {
+  
+    const user = await User.findOne({ emailId }).select("-password");
+  
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "user does not exits",
         data: {},
       });
     }
+  
+    if (!user || ! (await user.comparePassword(password))) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid Credentials",
+        data: {},
+      });
+    }
+
+    const loggedUser = await User.findById(user._id).select('-password')
+    return res.status(200).json({
+      success:true,
+      message: "User logged in successfully",
+      data: loggedUser
+    })
+} catch (error) {
+  console.log(error)
+  return res.status(400).json({
+    success:false,
+    message: error.message,
+    data:{}
+  })
 }
+};
+// update user route
+const updateUser = async (req, res) => {
+  const userId = req.params?.userId; // Correctly access the userId
+  const data = req.body;
+  try {
+    const ALLOWED_UPDATE = ["skills", "photoUrl", "about", "gender", "age"];
+    const isUpdateAllowed = Object.keys(data).every((k) =>
+      ALLOWED_UPDATE.includes(k)
+    );
 
+    if (!isUpdateAllowed) {
+      throw new Error("update not allowed");
+    }
 
+    if (data?.skills?.length > 10) {
+      throw new Error("skills must be less then 10");
+    }
+    const user = await User.findByIdAndUpdate(userId, data, {
+      // Pass userId directly
+      new: true, // Use 'new' to return the updated document
+      runValidators: true,
+    });
 
-const userProfile = async (req , res) =>{
-    console.log("user profile controller");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+        data: {},
+      });
+    }
 
     res.status(200).json({
-        success:true,
-        message:"user profile",
-        data:{}
-    })
-}
+      success: true,
+      message: "User updated successfully",
+      data: user,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+      data: {},
+    });
+  }
+};
 
+const userProfile = async (req, res) => {
+  console.log("user profile controller");
 
-export {signup,updateUser,userProfile}
+  res.status(200).json({
+    success: true,
+    message: "user profile",
+    data: {},
+  });
+};
+
+export { signup, updateUser, userProfile, login };
