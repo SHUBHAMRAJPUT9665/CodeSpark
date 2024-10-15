@@ -5,22 +5,32 @@ import User from "../models/user.model.js";
 const signup = async (req,res) =>{
     try {
         const { emailId, firstName, password } = req.body;
-    
+
+        const alredyUser = await User.find({emailId})
+      
         const userData = new User({
           emailId,
           password,
           firstName,
         });
-    
+
+        if(!userData) return  res.status(400).json({
+          success:false,
+          message: "error while user created",
+        });
         userData.save();
+
+
+        const newUser = await User.find({emailId}).select('-password')
     
         res.status(200).json({
           success: true,
           message: "user created",
+          data:newUser
         });
       } 
       catch (error) {
-        res.status(200).json({
+        res.status(400).json({
             success: false,
             message: error.message,
             data:{}
