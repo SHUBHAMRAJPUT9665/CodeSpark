@@ -181,7 +181,13 @@ const userProfile = async (req, res) => {
 
 
  const userProfile = await User.findById(_id).select('-password')
-
+ if(!userProfile){
+  res.status(409).json({
+    success: false,
+    message: "something went wrong please login again",
+    data: {},
+  });
+ }
   res.status(200).json({
     success: true,
     message: "user profile",
