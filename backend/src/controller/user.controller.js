@@ -1,5 +1,7 @@
 import User from "../models/user.model.js";
 
+
+
 // signup user
 const signup = async (req, res) => {
   try {
@@ -75,7 +77,6 @@ const signup = async (req, res) => {
 // user login controller
 const login = async (req, res, next) => {
   const { emailId, password } = req.body;
-
   if (!emailId || !password) {
     return res.status(400).json({
       success: false,
@@ -83,19 +84,21 @@ const login = async (req, res, next) => {
       data: {},
     });
   }
-try {
-  
-    const user = await User.findOne({ emailId }).select("-password");
-  
+
+  try {
+    // Get user with the password for comparison
+    const user = await User.findOne({ emailId });
+    
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: "user does not exits",
+        message: "User does not exist",
         data: {},
       });
     }
-  
-    if (!user || ! (await user.comparePassword(password))) {
+
+    // Compare the entered password with the stored hashed password
+    if (!(await user.comparePassword(password))) {
       return res.status(401).json({
         success: false,
         message: "Invalid Credentials",
@@ -103,21 +106,31 @@ try {
       });
     }
 
-    const loggedUser = await User.findById(user._id).select('-password')
+    // Remove password from the user object after comparison
+    const loggedUser = await User.findById(user._id).select("-password");
+
+    // Generate JWT token
+    const token = await user.generateJWTToken();
+
+    // Set the cookie with token
+    res.cookie("token", token);
+
     return res.status(200).json({
-      success:true,
+      success: true,
       message: "User logged in successfully",
-      data: loggedUser
-    })
-} catch (error) {
-  console.log(error)
-  return res.status(400).json({
-    success:false,
-    message: error.message,
-    data:{}
-  })
-}
+      data: loggedUser,
+      token,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+      data: {},
+    });
+  }
 };
+
 // update user route
 const updateUser = async (req, res) => {
   const userId = req.params?.userId; // Correctly access the userId
@@ -164,12 +177,15 @@ const updateUser = async (req, res) => {
 };
 
 const userProfile = async (req, res) => {
-  console.log("user profile controller");
+ const {_id} = req.user
+
+
+ const userProfile = await User.findById(_id).select('-password')
 
   res.status(200).json({
     success: true,
     message: "user profile",
-    data: {},
+    data: userProfile,
   });
 };
 

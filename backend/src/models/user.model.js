@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from 'bcrypt'
-
+import jwt from 'jsonwebtoken'
 
 const UserSchema = mongoose.Schema({
   firstName: {
@@ -33,7 +33,6 @@ const UserSchema = mongoose.Schema({
     type: String,
     required: true,
     minLength: [8, "password is must be 8 character"],
-    select: false,
   },
   age: {
     type: Number,
@@ -79,7 +78,7 @@ UserSchema.pre("save", function (next) {
 // user password hash function code
 UserSchema.pre('save',async function(next){
   if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password , 10);
+  this.password = bcrypt.hash(this.password , 10);
   next();
 })
 
@@ -88,6 +87,14 @@ UserSchema.pre('save',async function(next){
 UserSchema.methods.comparePassword = async function(password){
   return await bcrypt.compare(password , this.password)
 }
+
+UserSchema.methods.generateJWTToken = async function() {
+  return jwt.sign(
+    { _id: this._id },
+    process.env.ACCESS_TOKEN_SECRET,
+    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY || '1h' } // Default to 1 hour if not set
+  );
+};
 
 
 
