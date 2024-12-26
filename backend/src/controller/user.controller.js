@@ -1,7 +1,5 @@
 import User from "../models/user.model.js";
 
-
-
 // signup user
 const signup = async (req, res) => {
   try {
