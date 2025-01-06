@@ -43,7 +43,6 @@ const signup = async (req, res) => {
         message: "error while user created",
       });
       user.save();
-
     const createdUser = await User.findById( user._id).select("-password");
 
     if (!createdUser) {
@@ -56,7 +55,6 @@ const signup = async (req, res) => {
         })
       );
     }
-
     return res.status(201).json({
       success: true,
       message: "user created successfully",
@@ -71,7 +69,6 @@ const signup = async (req, res) => {
     });
   }
 };
-
 // user login controller
 const login = async (req, res, next) => {
   const { emailId, password } = req.body;
@@ -160,13 +157,13 @@ const updateUser = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+   return res.status(200).json({
       success: true,
       message: "User updated successfully",
       data: user,
     });
   } catch (error) {
-    res.status(400).json({
+   return res.status(400).json({
       success: false,
       message: error.message,
       data: {},
@@ -175,18 +172,17 @@ const updateUser = async (req, res) => {
 };
 
 const userProfile = async (req, res) => {
+  // user id extracted from the cookies
  const {_id} = req.user
-
-
  const userProfile = await User.findById(_id).select('-password')
  if(!userProfile){
-  res.status(409).json({
+  return res.status(409).json({
     success: false,
     message: "something went wrong please login again",
     data: {},
   });
  }
-  res.status(200).json({
+ return res.status(200).json({
     success: true,
     message: "user profile",
     data: userProfile,
