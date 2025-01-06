@@ -9,5 +9,6 @@ router.route('/login').post(login)
 router.route('/update').post(isLoggedIn,updateUser)
 router.route('/profile').get(isLoggedIn,userProfile)
 router.route('/chat').post(isLoggedIn,chatInstance)
+router.route('/delete').delete(isLooggedIn,deleteUser)
 
 export default router
