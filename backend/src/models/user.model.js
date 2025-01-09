@@ -75,6 +75,7 @@ UserSchema.pre("save", function (next) {
   next();
 });
 
+// before saving the data into DB check password is encrypted or not
 // user password hash function code
 UserSchema.pre('save',async function(next){
   if (!this.isModified('password')) return next();
