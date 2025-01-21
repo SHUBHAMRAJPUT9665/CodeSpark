@@ -7,14 +7,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
-
-
+// user route
 app.use('/api/v1/user',userRouter)
-
-
-
-
-
 
 export { app };

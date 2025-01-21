@@ -75,6 +75,7 @@ UserSchema.pre("save", function (next) {
   next();
 });
 
+// before saving the data into DB check password is encrypted or not
 // user password hash function code
 UserSchema.pre('save',async function(next){
   if (!this.isModified('password')) return next();
@@ -83,10 +84,10 @@ UserSchema.pre('save',async function(next){
 })
 
 // compare password method
-
 UserSchema.methods.comparePassword = async function(password){
   return await bcrypt.compare(password , this.password)
 }
+
 
 UserSchema.methods.generateJWTToken = async function() {
   return jwt.sign(
@@ -96,8 +97,5 @@ UserSchema.methods.generateJWTToken = async function() {
   );
 };
 
-
-
 const User = mongoose.model("User", UserSchema);
-
 export default User
