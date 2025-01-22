@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken';
-
 const isLoggedIn = async (req, res, next) => {
   try {
     const { token } = req.cookies;
@@ -21,7 +20,6 @@ const isLoggedIn = async (req, res, next) => {
         data: {},
       });
     }
-
     req.user = userDetails;
     next();
   } catch (error) {
@@ -32,9 +30,7 @@ const isLoggedIn = async (req, res, next) => {
         data: {},
       });
     }
-
     console.error('Token verification error:', error);
-
     return res.status(400).json({
       success: false,
       message: 'Token verification failed, please login again',
@@ -42,5 +38,4 @@ const isLoggedIn = async (req, res, next) => {
     });
   }
 };
-
 export { isLoggedIn };
