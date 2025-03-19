@@ -6,9 +6,6 @@ const app = express();
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// user route
+// user rout
 app.use('/api/v1/user',userRouter)
-
-
 export { app };
