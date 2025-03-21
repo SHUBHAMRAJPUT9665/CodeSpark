@@ -7,7 +7,6 @@ const router = Router()
 // login and sign up routes
 router.route('/signup').post(signup)
 router.route('/login').post(login)
-
   // update route
 router.route('/update').post(isLoggedIn,updateUser)
 
