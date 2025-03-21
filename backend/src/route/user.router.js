@@ -3,6 +3,7 @@ import { signup , login, updateUser,userProfile} from "../controller/user.contro
 import { isLoggedIn } from "../middleware/auth.middleware.js";
 const router = Router()
 
+
 // login and sign up routes
 router.route('/signup').post(signup)
 router.route('/login').post(login)
