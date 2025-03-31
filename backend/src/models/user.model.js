@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 
+
 const UserSchema = mongoose.Schema({
   firstName: {
     type: String,
